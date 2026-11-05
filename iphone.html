@@ -1169,7 +1169,11 @@
       }, 2200);
     }
 
-    initBible();
+    initBible().then(() => {
+      if (window.location.search.includes("alerta=1")) {
+        triggerAlertOverlay("TOQUE RÁPIDO IPHONE");
+      }
+    });
   </script>
 </body>
 </html>
