@@ -1,0 +1,18 @@
+{
+  "name": "Recordatorios",
+  "short_name": "Recordatorios",
+  "description": "Recordatorios de Promesa y Biblia Reina-Valera 1960 (31,104 versículos)",
+  "start_url": "/iphone.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#080d16",
+  "theme_color": "#080d16",
+  "icons": [
+    {
+      "src": "assets_pc/img_apple_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

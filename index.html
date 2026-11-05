@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Recordatorios</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#080d16" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Recordatorios" />
+  <link rel="apple-touch-icon" href="assets_pc/img_apple_icon.png" />
+  <link rel="icon" type="image/png" href="assets_pc/img_cross_emblem.png" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Segoe UI', Roboto, sans-serif;
+    }
+
+    .serif {
+      font-family: Georgia, 'Times New Roman', Times, serif;
+    }
+
+    body {
+      min-height: 100dvh;
+      background: #080d16;
+      color: #f1f5f9;
+      padding-top: max(12px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      padding-left: 16px;
+      padding-right: 16px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 460px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+    }
+
+    /* Aviso de instalación en Safari de iPhone */
+    .ios-install-banner {
+      background: #152238;
+      border: 1px solid rgba(212, 175, 55, 0.45);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .ios-install-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fde68a;
+    }
+
+    .ios-install-steps {
+      font-size: 12px;
+      color: #e2e8f0;
+      line-height: 1.45;
+    }
+
+    /* Encabezado limpio */
+    .app-header {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 0;
+    }
+
+    .header-cross-img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+    }
+
+    .app-title {
+      font-size: 23px;
+      font-weight: 700;
+      color: #ffffff;
+      font-family: Georgia, 'Times New Roman', serif;
+    }
+
+    .app-subtitle {
+      font-size: 11.5px;
+      color: #94a3b8;
+    }
+
+    /* Tarjeta 1: Versículo Aleatorio */
+    .hero-card {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #111927;
+      color: #ffffff;
+    }
+
+    .hero-bg-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10, 17, 28, 0.84) 0%, rgba(12, 21, 35, 0.95) 100%);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero-top-row {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .card-section-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .hero-index {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+
+    .verse-text {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(15.5px, 4.3vw, 18px);
+      line-height: 1.46;
+      font-style: italic;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+
+    .verse-ref-text {
+      color: #d4af37;
+      font-size: 12.5px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .btn-primary-gold {
+      width: 100%;
+      height: 44px;
+      border: none;
+      border-radius: 12px;
+      background: #d4af37;
+      color: #140e00;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-bottom: 8px;
+    }
+
+    .hero-actions {
+      width: 100%;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .btn-secondary {
+      padding: 8px 4px;
+      border-radius: 9px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.04);
+      color: #e2e8f0;
+      font-size: 11.5px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    /* Tarjeta 2: Mi Promesa Personal */
+    .promise-card {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      background: #111927;
+      color: #ffffff;
+    }
+
+    .promise-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(13, 22, 36, 0.86) 0%, rgba(15, 25, 40, 0.95) 100%);
+    }
+
+    .promise-content {
+      position: relative;
+      z-index: 2;
+      padding: 16px;
+    }
+
+    .promise-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .btn-edit-link {
+      background: none;
+      border: none;
+      color: #d4af37;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .promise-body-text {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 15.5px;
+      line-height: 1.42;
+      color: #ffffff;
+      margin-bottom: 5px;
+    }
+
+    .promise-ref-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: #d4af37;
+    }
+
+    .promise-editor {
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .promise-editor textarea,
+    .promise-editor input {
+      width: 100%;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      font-size: 14px;
+      background: #0b111c;
+      color: #ffffff;
+    }
+
+    /* Tarjetas Nativas iOS / Android */
+    .native-card {
+      background: #111826;
+      border-radius: 20px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .native-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .native-card-title {
+      font-size: 14.5px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .native-card-sub {
+      font-size: 11.5px;
+      color: #94a3b8;
+    }
+
+    .header-right-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .status-badge {
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .status-badge.on {
+      background: rgba(16, 185, 129, 0.16);
+      color: #6ee7b7;
+    }
+
+    .status-badge.off {
+      background: rgba(148, 163, 184, 0.14);
+      color: #94a3b8;
+    }
+
+    .alarms-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .alarm-row {
+      background: #172031;
+      border-radius: 14px;
+      padding: 11px 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .alarm-time-display {
+      display: flex;
+      align-items: baseline;
+      gap: 5px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .alarm-digits {
+      font-size: 25px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .alarm-digits.disabled {
+      color: #64748b;
+    }
+
+    .alarm-ampm {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+
+    .alarm-caption {
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .alarm-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-del-alarm {
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 18px;
+      padding: 2px 6px;
+    }
+
+    .add-alarm-Form {
+      display: none;
+      background: #172031;
+      border-radius: 14px;
+      padding: 12px;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .time-picker-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .time-input-native {
+      flex: 1;
+      background: #0d131f;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 9px;
+      color: #ffffff;
+      padding: 8px 10px;
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .btn-add-alarm {
+      width: 100%;
+      padding: 10px;
+      border-radius: 11px;
+      border: 1px dashed rgba(255, 255, 255, 0.2);
+      background: transparent;
+      color: #cbd5e1;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .custom-interval-box {
+      background: #172031;
+      border-radius: 14px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .custom-interval-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .custom-interval-title {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: #e2e8f0;
+    }
+
+    .free-time-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .time-field-group {
+      background: #0d131f;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .time-field-group input {
+      width: 50px;
+      background: transparent;
+      border: none;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      outline: none;
+    }
+
+    .time-field-unit {
+      font-size: 11.5px;
+      color: #94a3b8;
+    }
+
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background-color: #263147;
+      transition: 0.2s;
+      border-radius: 999px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: #cbd5e1;
+      transition: 0.2s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: rgba(212, 175, 55, 0.4);
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(18px);
+      background-color: #d4af37;
+    }
+
+    .press-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+
+    .press-chip {
+      padding: 9px 4px;
+      text-align: center;
+      border-radius: 9px;
+      font-size: 11.5px;
+      font-weight: 600;
+      background: #172031;
+      color: #cbd5e1;
+      border: none;
+    }
+
+    .press-chip.selected {
+      background: #d4af37;
+      color: #140e00;
+      font-weight: 700;
+    }
+
+    .btn-test-alert {
+      width: 100%;
+      padding: 11px;
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: #172031;
+      color: #e2e8f0;
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    /* ALERTA A PANTALLA COMPLETA EN IPHONE */
+    .lockscreen-alert {
+      position: fixed;
+      inset: 0;
+      color: #ffffff;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      padding: max(28px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom)) 20px;
+    }
+
+    .lockscreen-scrim {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(6, 12, 22, 0.92) 0%, rgba(8, 16, 30, 0.97) 100%);
+    }
+
+    .lockscreen-inner {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      max-width: 440px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .alert-badge {
+      background: rgba(212, 175, 55, 0.18);
+      color: #fde68a;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 12px;
+      border-radius: 999px;
+      margin: 6px 0;
+      display: inline-block;
+    }
+
+    .alert-heading {
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 23px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .alert-promise-box {
+      width: 100%;
+      border-radius: 18px;
+      margin-bottom: 12px;
+      background: #131e30;
+      padding: 16px;
+    }
+
+    .alert-verse-box {
+      width: 100%;
+      background: #0e1624;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .btn-close-alert {
+      width: 100%;
+      height: 44px;
+      border-radius: 11px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      background: transparent;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e293b;
+      color: #f8fafc;
+      padding: 8px 16px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      z-index: 200;
+      display: none;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.55);
+      white-space: nowrap;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Banner automático si se abre en Safari antes de agregar a Pantalla de Inicio -->
+    <div class="ios-install-banner" id="iosInstallBanner">
+      <div class="ios-install-title">Instalar Recordatorios en tu iPhone</div>
+      <div class="ios-install-steps">
+        1. Toca el botón <strong>Compartir</strong> en la barra inferior de Safari.<br/>
+        2. Elige <strong>«Agregar a pantalla de inicio»</strong> y toca <strong>Agregar</strong>.
+      </div>
+    </div>
+
+    <div class="app-header">
+      <img src="assets_pc/img_cross_emblem.png" alt="Cruz Principal" class="header-cross-img" />
+      <div class="app-title">Recordatorios</div>
+      <div class="app-subtitle" id="headerSubtitle">Reina-Valera 1960 • 31,104 versículos</div>
+    </div>
+
+    <!-- 1. Versículo Aleatorio -->
+    <div class="hero-card">
+      <img src="assets_pc/img_bible_hero.jpg" alt="" class="hero-bg-img" />
+      <div class="hero-scrim"></div>
+
+      <div class="hero-content">
+        <div class="hero-top-row">
+          <span class="card-section-label">Versículo aleatorio</span>
+          <span class="hero-index" id="verseGlobalIndex">19647 / 31104</span>
+        </div>
+
+        <div class="verse-text" id="mainVerseText">
+          «Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.»
+        </div>
+
+        <div class="verse-ref-text" id="mainVerseRef">Jeremías 29:11</div>
+
+        <button class="btn-primary-gold" onclick="drawNewRandomVerse()">
+          Cambiar versículo
+        </button>
+
+        <div class="hero-actions">
+          <button class="btn-secondary" onclick="copyCurrentVerse()">Copiar</button>
+          <button class="btn-secondary" onclick="shareCurrentVerse()">Compartir</button>
+          <button class="btn-secondary" onclick="pinCurrentVerseAsPromise()">Usar promesa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Mi Promesa Personal -->
+    <div class="promise-card">
+      <img src="assets_pc/img_promise_sunrise.jpg" alt="" class="hero-bg-img" />
+      <div class="promise-scrim"></div>
+
+      <div class="promise-content">
+        <div class="promise-header">
+          <span class="card-section-label">Mi promesa personal</span>
+          <button class="btn-edit-link" id="editToggleBtn" onclick="togglePromiseEditor()">Editar</button>
+        </div>
+
+        <div id="promiseDisplayArea">
+          <div class="promise-body-text" id="savedPromiseText">
+            “Dios cumplirá Su propósito en mi vida; Su promesa permanece fiel y nunca me dejará.”
+          </div>
+          <div class="promise-ref-text" id="savedPromiseRef">
+            Salmos 138:8 • Mi Promesa Personal
+          </div>
+        </div>
+
+        <div class="promise-editor" id="promiseEditorArea">
+          <textarea id="inputPromiseText" rows="3" placeholder="Escribe la promesa que deseas recordar..."></textarea>
+          <input id="inputPromiseRef" type="text" placeholder="Cita o referencia personal" />
+          <button class="btn-primary-gold" style="margin-bottom:0;" onclick="savePromiseFromEditor()">Guardar promesa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3. Alarmas y Recordatorios -->
+    <div class="native-card">
+      <div class="native-card-header">
+        <div>
+          <div class="native-card-title">Alarmas y recordatorios</div>
+          <div class="native-card-sub">Elige cualquier hora o tiempo libre</div>
+        </div>
+        <div class="header-right-controls">
+          <span class="status-badge on" id="autoStatusBadge">ACTIVO</span>
+          <label class="switch">
+            <input type="checkbox" id="chkMasterAuto" checked onchange="toggleAutoReminder(this.checked)" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="alarms-list" id="alarmsListContainer"></div>
+
+      <div class="add-alarm-Form" id="addAlarmForm">
+        <div style="font-size: 12px; color: #cbd5e1; font-weight: 600;">Selecciona cualquier hora:</div>
+        <div class="time-picker-row">
+          <input type="time" id="newAlarmTimeInput" class="time-input-native" value="07:30" />
+          <button class="btn-primary-gold" style="width: auto; height: 38px; padding: 0 14px; margin: 0;" onclick="confirmAddAlarm()">Guardar</button>
+          <button class="btn-secondary" style="height: 38px; padding: 0 10px;" onclick="toggleAddAlarmForm(false)">Cancelar</button>
+        </div>
+      </div>
+
+      <button class="btn-add-alarm" id="btnShowAddAlarm" onclick="toggleAddAlarmForm(true)">
+        + Agregar alarma a cualquier hora
+      </button>
+
+      <div class="custom-interval-box">
+        <div class="custom-interval-top">
+          <span class="custom-interval-title">Repetir cada (escribe cualquier tiempo):</span>
+          <label class="switch">
+            <input type="checkbox" id="chkRepeatInterval" checked onchange="updateCustomRepeatInterval()" />
+            <span class="slider"></span>
+          </label>
+        </div>
+        <div class="free-time-inputs">
+          <div class="time-field-group">
+            <input type="number" id="inputCustomHours" min="0" max="23" value="0" onchange="updateCustomRepeatInterval()" oninput="updateCustomRepeatInterval()" />
+            <span class="time-field-unit">horas</span>
+          </div>
+          <div class="time-field-group">
+            <input type="number" id="inputCustomMinutes" min="1" max="59" value="45" onchange="updateCustomRepeatInterval()" oninput="updateCustomRepeatInterval()" />
+            <span class="time-field-unit">min</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. Activación Rápida en iPhone (Toques / Sacudir / Botón) -->
+    <div class="native-card">
+      <div class="native-card-header">
+        <div>
+          <div class="native-card-title">Activación por toques</div>
+          <div class="native-card-sub">Toca o sacude tu iPhone para abrir la alerta</div>
+        </div>
+        <div class="header-right-controls">
+          <span class="status-badge on" id="btnDetectorBadge">ACTIVO</span>
+          <label class="switch">
+            <input type="checkbox" id="chkPowerDetector" checked onchange="togglePowerButtonDetector(this.checked)" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div class="press-selector" id="pressSelector">
+        <button class="press-chip" onclick="setRequiredPresses(3)">3 toques</button>
+        <button class="press-chip" onclick="setRequiredPresses(4)">4 toques</button>
+        <button class="press-chip" onclick="setRequiredPresses(5)">5 toques</button>
+        <button class="press-chip selected" onclick="setRequiredPresses(6)">6 toques</button>
+      </div>
+
+      <button class="btn-test-alert" onclick="triggerAlertOverlay('Alerta en pantalla completa')">
+        Probar alerta en pantalla completa ahora
+      </button>
+    </div>
+  </div>
+
+  <!-- ALERTA A PANTALLA COMPLETA -->
+  <div class="lockscreen-alert" id="lockscreenAlert">
+    <img src="assets_pc/img_bible_hero.jpg" alt="" class="hero-bg-img" />
+    <div class="lockscreen-scrim"></div>
+
+    <div class="lockscreen-inner">
+      <div style="width: 100%; display: flex; flex-direction: column; align-items: center;">
+        <img src="assets_pc/img_cross_emblem.png" alt="Cruz Principal" class="header-cross-img" />
+        <span class="alert-badge" id="alertSourceBadge">Recordatorio</span>
+        <div class="alert-heading">Recuerda Tu Promesa</div>
+
+        <div class="alert-promise-box">
+          <div style="font-size: 11px; font-weight: 700; color: #d4af37; margin-bottom: 6px;">
+            Mi promesa recordada
+          </div>
+          <div id="alertPromiseText" class="serif" style="font-size: 15.5px; line-height: 1.42; margin-bottom: 6px;">
+            “Dios cumplirá Su propósito en mi vida; Su promesa permanece fiel y nunca me dejará.”
+          </div>
+          <div id="alertPromiseRef" style="font-size: 11.5px; font-weight: 600; color: #fde68a;">
+            Salmos 138:8 • Mi Promesa Personal
+          </div>
+        </div>
+
+        <div class="alert-verse-box">
+          <div style="font-size: 11px; font-weight: 700; color: #93c5fd; margin-bottom: 8px;">
+            Versículo aleatorio
+          </div>
+          <div id="alertVerseText" class="serif" style="font-size: 16.5px; font-style: italic; line-height: 1.46; margin-bottom: 10px;">
+            «Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.»
+          </div>
+          <div id="alertVerseRef" style="color: #d4af37; font-size: 12.5px; font-weight: 700;">
+            Jeremías 29:11
+          </div>
+        </div>
+      </div>
+
+      <div style="width: 100%;">
+        <button class="btn-primary-gold" style="margin-bottom: 0;" onclick="drawRandomVerseInAlert()">
+          Otro versículo aleatorio
+        </button>
+        <button class="btn-close-alert" onclick="dismissAlertOverlay()">
+          Cerrar alerta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toastMsg">Copiado</div>
+
+  <script src="biblia_data.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+
+    // Mostrar banner de instalación si no está abierto aún desde el icono de inicio en iPhone
+    const isStandalone = window.navigator.standalone === true || window.matchMedia("(display-mode: standalone)").matches;
+    if (!isStandalone) {
+      document.getElementById("iosInstallBanner").style.display = "flex";
+    }
+
+    let allVerses = [];
+    let currentVerse = {
+      bookName: "Jeremías",
+      chapter: 29,
+      verseNumber: 11,
+      text: "Porque yo sé los pensamientos que tengo acerca de vosotros, dice Jehová, pensamientos de paz, y no de mal, para daros el fin que esperáis.",
+      globalIndex: 19647
+    };
+
+    let promiseText = localStorage.getItem("promesa_text") || "Dios cumplirá Su propósito en mi vida; Su promesa permanece fiel y nunca me dejará.";
+    let promiseRef = localStorage.getItem("promesa_ref") || "Salmos 138:8 • Mi Promesa Personal";
+    let requiredPresses = parseInt(localStorage.getItem("required_presses") || "6", 10);
+    let autoReminderEnabled = localStorage.getItem("auto_reminder_enabled") !== "false";
+    let powerDetectorEnabled = localStorage.getItem("power_detector_enabled") !== "false";
+    let customRepeatTimer = null;
+
+    let phoneAlarms = JSON.parse(localStorage.getItem("phone_alarms_list") || "null") || [
+      { id: 1, time: "08:00", enabled: true },
+      { id: 2, time: "21:30", enabled: false }
+    ];
+
+    function playGentleAlertChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(528, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(660, ctx.currentTime + 0.35);
+        gain.gain.setValueAtTime(0.18, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.7);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start();
+        osc.stop(ctx.currentTime + 0.7);
+      } catch (_) {}
+    }
+
+    function initBible() {
+      if (Array.isArray(window.BIBLIA_DATA)) {
+        let idx = 1;
+        for (let b = 0; b < window.BIBLIA_DATA.length; b++) {
+          const book = window.BIBLIA_DATA[b];
+          const bName = book.name || ("Libro " + (b + 1));
+          const chapters = book.chapters || [];
+          for (let c = 0; c < chapters.length; c++) {
+            const verses = chapters[c];
+            for (let v = 0; v < verses.length; v++) {
+              allVerses.push({
+                bookName: bName,
+                chapter: c + 1,
+                verseNumber: v + 1,
+                text: verses[v],
+                globalIndex: idx++
+              });
+            }
+          }
+        }
+      }
+      if (allVerses.length > 0) {
+        document.getElementById("headerSubtitle").textContent = "Reina-Valera 1960 • " + allVerses.length.toLocaleString() + " versículos";
+        drawNewRandomVerse();
+      }
+      renderSavedPromise();
+      setRequiredPresses(requiredPresses);
+      renderAlarmsList();
+      renderAutoReminderUI();
+      renderPowerDetectorUI();
+      updateCustomRepeatInterval();
+
+      // Si se abre con ?alerta=1 (Atajo de Tocar Atrás / Botón de Acción de iPhone)
+      if (window.location.search.includes("alerta=1")) {
+        triggerAlertOverlay("Atajo de iPhone");
+      }
+    }
+
+    function pickRandomFromPool() {
+      if (allVerses.length > 0) {
+        const r = Math.floor(Math.random() * allVerses.length);
+        return allVerses[r];
+      }
+      return currentVerse;
+    }
+
+    function drawNewRandomVerse() {
+      currentVerse = pickRandomFromPool();
+      const total = allVerses.length || 31104;
+      document.getElementById("mainVerseText").textContent = "«" + currentVerse.text + "»";
+      document.getElementById("mainVerseRef").textContent = currentVerse.bookName + " " + currentVerse.chapter + ":" + currentVerse.verseNumber;
+      document.getElementById("verseGlobalIndex").textContent = currentVerse.globalIndex + " / " + total;
+    }
+
+    function drawRandomVerseInAlert() {
+      const v = pickRandomFromPool();
+      document.getElementById("alertVerseText").textContent = "«" + v.text + "»";
+      document.getElementById("alertVerseRef").textContent = v.bookName + " " + v.chapter + ":" + v.verseNumber;
+    }
+
+    function renderSavedPromise() {
+      document.getElementById("savedPromiseText").textContent = "“" + promiseText + "”";
+      document.getElementById("savedPromiseRef").textContent = promiseRef;
+      document.getElementById("alertPromiseText").textContent = "“" + promiseText + "”";
+      document.getElementById("alertPromiseRef").textContent = promiseRef;
+    }
+
+    function togglePromiseEditor() {
+      const disp = document.getElementById("promiseDisplayArea");
+      const edit = document.getElementById("promiseEditorArea");
+      const btn = document.getElementById("editToggleBtn");
+      if (edit.style.display === "flex") {
+        edit.style.display = "none";
+        disp.style.display = "block";
+        btn.textContent = "Editar";
+      } else {
+        document.getElementById("inputPromiseText").value = promiseText;
+        document.getElementById("inputPromiseRef").value = promiseRef;
+        disp.style.display = "none";
+        edit.style.display = "flex";
+        btn.textContent = "Cancelar";
+      }
+    }
+
+    function savePromiseFromEditor() {
+      const t = document.getElementById("inputPromiseText").value.trim();
+      const r = document.getElementById("inputPromiseRef").value.trim();
+      promiseText = t || "Dios cumplirá Su propósito en mi vida.";
+      promiseRef = r || "Mi Promesa Personal";
+      localStorage.setItem("promesa_text", promiseText);
+      localStorage.setItem("promesa_ref", promiseRef);
+      renderSavedPromise();
+      togglePromiseEditor();
+      showToast("Promesa guardada");
+    }
+
+    function pinCurrentVerseAsPromise() {
+      promiseText = currentVerse.text;
+      promiseRef = currentVerse.bookName + " " + currentVerse.chapter + ":" + currentVerse.verseNumber + " • Promesa Bíblica";
+      localStorage.setItem("promesa_text", promiseText);
+      localStorage.setItem("promesa_ref", promiseRef);
+      renderSavedPromise();
+      showToast("Versículo fijado como tu promesa");
+    }
+
+    function copyCurrentVerse() {
+      const str = "«" + currentVerse.text + "» — " + currentVerse.bookName + " " + currentVerse.chapter + ":" + currentVerse.verseNumber;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(str);
+      }
+      showToast("Copiado al portapapeles");
+    }
+
+    function shareCurrentVerse() {
+      const str = "«" + currentVerse.text + "» — " + currentVerse.bookName + " " + currentVerse.chapter + ":" + currentVerse.verseNumber;
+      if (navigator.share) {
+        navigator.share({ title: "Recordatorios", text: str }).catch(() => {});
+      } else {
+        copyCurrentVerse();
+      }
+    }
+
+    function format12Hour(timeStr) {
+      const parts = (timeStr || "08:00").split(":");
+      let h = parseInt(parts[0], 10) || 0;
+      const m = parts[1] || "00";
+      const ampm = h < 12 ? "a. m." : "p. m.";
+      const h12 = h === 0 ? 12 : (h > 12 ? h - 12 : h);
+      return {
+        digits: String(h12).padStart(2, "0") + ":" + m,
+        ampm: ampm
+      };
+    }
+
+    function renderAlarmsList() {
+      const container = document.getElementById("alarmsListContainer");
+      container.innerHTML = "";
+      phoneAlarms.forEach((alarm) => {
+        const fmt = format12Hour(alarm.time);
+        const isActive = alarm.enabled && autoReminderEnabled;
+        const row = document.createElement("div");
+        row.className = "alarm-row";
+        row.innerHTML = `
+          <div>
+            <label class="alarm-time-display">
+              <span class="alarm-digits ${isActive ? '' : 'disabled'}">${fmt.digits}</span>
+              <span class="alarm-ampm">${fmt.ampm}</span>
+              <input type="time" value="${alarm.time}" style="position:absolute; opacity:0; width:1px; height:1px;" onchange="changeAlarmTime(${alarm.id}, this.value)" />
+            </label>
+            <div class="alarm-caption">Promesa y versículo</div>
+          </div>
+          <div class="alarm-right">
+            <label class="switch">
+              <input type="checkbox" ${isActive ? "checked" : ""} onchange="toggleSingleAlarm(${alarm.id}, this.checked)" />
+              <span class="slider"></span>
+            </label>
+            <button class="btn-del-alarm" onclick="deleteAlarm(${alarm.id})">×</button>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+      localStorage.setItem("phone_alarms_list", JSON.stringify(phoneAlarms));
+    }
+
+    function changeAlarmTime(id, newTime) {
+      if (!newTime) return;
+      phoneAlarms = phoneAlarms.map(a => a.id === id ? { ...a, time: newTime, enabled: true } : a);
+      renderAlarmsList();
+      showToast("Alarma actualizada");
+    }
+
+    function toggleSingleAlarm(id, checked) {
+      phoneAlarms = phoneAlarms.map(a => a.id === id ? { ...a, enabled: checked } : a);
+      renderAlarmsList();
+    }
+
+    function deleteAlarm(id) {
+      phoneAlarms = phoneAlarms.filter(a => a.id !== id);
+      renderAlarmsList();
+      showToast("Alarma eliminada");
+    }
+
+    function toggleAddAlarmForm(show) {
+      document.getElementById("addAlarmForm").style.display = show ? "flex" : "none";
+      document.getElementById("btnShowAddAlarm").style.display = show ? "none" : "block";
+    }
+
+    function confirmAddAlarm() {
+      const val = document.getElementById("newAlarmTimeInput").value || "08:00";
+      phoneAlarms.push({ id: Date.now(), time: val, enabled: true });
+      toggleAddAlarmForm(false);
+      renderAlarmsList();
+      showToast("Alarma agregada");
+    }
+
+    function updateCustomRepeatInterval() {
+      clearInterval(customRepeatTimer);
+      const repeatOn = document.getElementById("chkRepeatInterval").checked;
+      if (!repeatOn || !autoReminderEnabled) return;
+      const h = Math.max(0, parseInt(document.getElementById("inputCustomHours").value || "0", 10));
+      const m = Math.max(0, parseInt(document.getElementById("inputCustomMinutes").value || "0", 10));
+      const totalMinutes = Math.max(1, h * 60 + m);
+      customRepeatTimer = setInterval(() => {
+        if (autoReminderEnabled && document.getElementById("chkRepeatInterval").checked) {
+          triggerAlertOverlay("Recordatorio automático");
+        }
+      }, totalMinutes * 60 * 1000);
+    }
+
+    function toggleAutoReminder(enabled) {
+      autoReminderEnabled = enabled;
+      localStorage.setItem("auto_reminder_enabled", String(autoReminderEnabled));
+      renderAutoReminderUI();
+      renderAlarmsList();
+      updateCustomRepeatInterval();
+      showToast(autoReminderEnabled ? "Recordatorios activos" : "Recordatorios apagados");
+    }
+
+    function renderAutoReminderUI() {
+      const badge = document.getElementById("autoStatusBadge");
+      document.getElementById("chkMasterAuto").checked = autoReminderEnabled;
+      badge.className = autoReminderEnabled ? "status-badge on" : "status-badge off";
+      badge.textContent = autoReminderEnabled ? "ACTIVO" : "APAGADO";
+    }
+
+    function togglePowerButtonDetector(enabled) {
+      powerDetectorEnabled = enabled;
+      localStorage.setItem("power_detector_enabled", String(powerDetectorEnabled));
+      renderPowerDetectorUI();
+      showToast(powerDetectorEnabled ? "Detector activo" : "Detector apagado");
+    }
+
+    function renderPowerDetectorUI() {
+      const badge = document.getElementById("btnDetectorBadge");
+      document.getElementById("chkPowerDetector").checked = powerDetectorEnabled;
+      badge.className = powerDetectorEnabled ? "status-badge on" : "status-badge off";
+      badge.textContent = powerDetectorEnabled ? "ACTIVO" : "APAGADO";
+    }
+
+    function setRequiredPresses(count) {
+      requiredPresses = count;
+      localStorage.setItem("required_presses", String(count));
+      const chips = document.getElementById("pressSelector").children;
+      const counts = [3, 4, 5, 6];
+      for (let i = 0; i < counts.length; i++) {
+        chips[i].className = counts[i] === count ? "press-chip selected" : "press-chip";
+      }
+    }
+
+    function triggerAlertOverlay(sourceLabel) {
+      playGentleAlertChime();
+      const v = pickRandomFromPool();
+      document.getElementById("alertSourceBadge").textContent = sourceLabel;
+      document.getElementById("alertPromiseText").textContent = "“" + promiseText + "”";
+      document.getElementById("alertPromiseRef").textContent = promiseRef;
+      document.getElementById("alertVerseText").textContent = "«" + v.text + "»";
+      document.getElementById("alertVerseRef").textContent = v.bookName + " " + v.chapter + ":" + v.verseNumber;
+      document.getElementById("lockscreenAlert").style.display = "flex";
+    }
+
+    function dismissAlertOverlay() {
+      document.getElementById("lockscreenAlert").style.display = "none";
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toastMsg");
+      t.textContent = msg;
+      t.style.display = "block";
+      setTimeout(() => {
+        t.style.display = "none";
+      }, 2200);
+    }
+
+    initBible();
+  </script>
+</body>
+</html>
